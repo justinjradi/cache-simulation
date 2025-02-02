@@ -15,11 +15,11 @@ public abstract class MemoryLevel
     {
         if (addressSize > 31)
         {
-            Utils.log(Utils.LogLevel.WARNING, "Address size may not exceed 31");
+            Utils.log(Utils.LogLevel.ERROR, "Address size may not exceed 31");
         }
         if (wordSize > 31)
         {
-            Utils.log(Utils.LogLevel.WARNING, "Value size may not exceed 31");
+            Utils.log(Utils.LogLevel.ERROR, "Value size may not exceed 31");
         }
         this.name = name;
         this.addressSize = addressSize;

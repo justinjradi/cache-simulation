@@ -3,9 +3,9 @@ import utils.Utils;
 
 public class Cache extends MemoryLevel
 {
-    int numberOfSets;
-    int numberOfBlocksPerSet;
-    int numberOfWordsPerBlock;
+    int numberOfSets;   // Must be a power of 2
+    int numberOfBlocksPerSet;   // Must be a power of 2
+    int numberOfWordsPerBlock;  // Must be a power of 2
     int tagSize;
     int indexSize;
     int offsetSize;
@@ -13,7 +13,12 @@ public class Cache extends MemoryLevel
                   String name, int numberOfSets, int numberOfBlocksPerSet, int numberOfWordsPerBlock)
     {
         super(addressSize, wordSize, nextMemoryLevel, name);
-        
+        this.numberOfSets = numberOfSets;
+        this.numberOfBlocksPerSet = numberOfBlocksPerSet;
+        this.numberOfWordsPerBlock = numberOfWordsPerBlock;
+        this.indexSize = Integer.numberOfTrailingZeros(numberOfBlocksPerSet);
+        this.offsetSize = Integer.numberOfTrailingZeros(numberOfWordsPerBlock);
+
     }
     @Override
     public int read(int address)
