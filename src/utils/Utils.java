@@ -44,8 +44,7 @@ public class Utils
     {
         if ((sizeInBits > 31) || (sizeInBits < 0))
         {
-            Utils.log(Utils.LogLevel.ERROR, "Validate size failed because given size in bits is invalid");
-            return false;
+            throw new IllegalArgumentException("Validate size failed because given size in bits is invalid");
         }
         if (number < 0)
         {
@@ -59,12 +58,53 @@ public class Utils
         return true;
     }
 
-    public static void printTable(int[][] values, String[] headers, int rows, int columns)
+    public static boolean isPowerOfTwo(int x)
     {
-        int maxColumnSize = 0;
-        for (int i = 0; i < columns; i++)
+        return (x != 0) && ((x & (x - 1)) == 0);
+    }
+
+    public static void printTable(String[][] table, int numRows, int numColumns)
+    {
+        int[] maxLengthByColumn = new int[numColumns];
+        for (int i = 0; i < numRows; i++)
         {
-            // TODO
+            for (int j = 0; j < numColumns; j++)
+            {
+                if (table[i][j].length() > maxLengthByColumn[j])
+                {
+                    maxLengthByColumn[j] = table[i][j].length();
+                }
+            }
+        }
+        String[][] paddedTable = new String[numRows][numColumns];
+        for (int i = 0; i < numRows; i++)
+        {
+            for (int j = 0; j < numColumns; j++)
+            {
+                paddedTable[i][j] = table[i][j];
+                for (int k = 0; k < (maxLengthByColumn[j] - table[i][j].length()); k++)
+                {
+                    if (k % 2 == 0)
+                    {
+                        paddedTable[i][j] =  paddedTable[i][j] + " ";
+                    }
+                    else
+                    {
+                        paddedTable[i][j] = " " + paddedTable[i][j];
+                    }
+                }
+                paddedTable[i][j] = " " + paddedTable[i][j] + " ";
+            }
+        }
+        for (int i = 0; i < numRows; i++)
+        {
+            System.out.print("|");
+            for (int j = 0; j < numColumns; j++)
+            {
+                System.out.print(paddedTable[i][j]);
+                System.out.print("|");
+            }
+            System.out.print("\n");
         }
     }
 

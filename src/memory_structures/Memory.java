@@ -1,14 +1,18 @@
 package memory_structures;
 import utils.Utils;
 
+import java.util.Arrays;
+
 public class Memory extends MemoryLevel
 {
+    private int size;
     private int[] memory;
     public Memory(int addressSize, int wordSize, MemoryLevel nextMemoryLevel,
                   String name, int numberOfWords)
     {
         super(addressSize, wordSize, nextMemoryLevel, name);
-        this.memory = new int[numberOfWords];
+        this.size = numberOfWords;
+        this.memory = new int[size];
     }
 
     @Override
@@ -16,8 +20,7 @@ public class Memory extends MemoryLevel
     {
         if (!Utils.validateSize(address, addressSize))
         {
-            Utils.log(Utils.LogLevel.ERROR, "Address Size Invalid");
-            return -1;
+            throw new IllegalArgumentException("Failed read because address size invalid");
         }
         return this.memory[address];
     }
@@ -26,14 +29,26 @@ public class Memory extends MemoryLevel
     {
         if (!Utils.validateSize(address, addressSize))
         {
-            Utils.log(Utils.LogLevel.ERROR, "Failed write because address size invalid");
-            return;
+            throw new IllegalArgumentException("Failed write because address size invalid");
         }
         if (!Utils.validateSize(value, wordSize))
         {
-            Utils.log(Utils.LogLevel.ERROR, "Failed read because value size invalid");
-            return;
+            throw new IllegalArgumentException("Failed write because word size invalid");
         }
         this.memory[address] = value;
+    }
+    @Override
+    public void printContents()
+    {
+        System.out.println("Contents of memory " + name + ":");
+        String[][] table = new String[2][this.size + 1];
+        table[0][0] = "addy";
+        table[1][0] = "val";
+        for (int i = 0; i < this.size; i++)
+        {
+            table[0][i + 1] = Integer.toHexString(i);
+            table[1][i + 1] = Integer.toHexString(memory[i]);
+        }
+        Utils.printTable(table, 2, this.size + 1);
     }
 }
