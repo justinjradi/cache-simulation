@@ -22,7 +22,7 @@ public class Memory extends MemoryLevel
         {
             throw new IllegalArgumentException("Failed read because address size invalid");
         }
-        return this.memory[address];
+        return memory[address];
     }
     @Override
     public void write(int address, int value)
@@ -35,20 +35,20 @@ public class Memory extends MemoryLevel
         {
             throw new IllegalArgumentException("Failed write because word size invalid");
         }
-        this.memory[address] = value;
+        memory[address] = value;
     }
     @Override
     public void printContents()
     {
         System.out.println("Contents of memory " + name + ":");
-        String[][] printTable = new String[2][this.size + 1];
+        String[][] printTable = new String[2][size + 1];
         printTable[0][0] = "addy";
         printTable[1][0] = "val";
-        for (int i = 0; i < this.size; i++)
+        for (int i = 0; i < size; i++)
         {
-            printTable[0][i + 1] = Integer.toHexString(i);
-            printTable[1][i + 1] = Integer.toHexString(memory[i]);
+            printTable[0][i + 1] = "0x" + Integer.toHexString(i);
+            printTable[1][i + 1] = "0x" + Integer.toHexString(memory[i]);
         }
-        Utils.printTable(printTable, 2, this.size + 1);
+        Utils.printTable(printTable, 2, size + 1);
     }
 }
