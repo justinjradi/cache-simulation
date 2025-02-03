@@ -41,14 +41,14 @@ public class Memory extends MemoryLevel
     public void printContents()
     {
         System.out.println("Contents of memory " + name + ":");
-        String[][] table = new String[2][this.size + 1];
-        table[0][0] = "addy";
-        table[1][0] = "val";
+        String[][] printTable = new String[2][this.size + 1];
+        printTable[0][0] = "addy";
+        printTable[1][0] = "val";
         for (int i = 0; i < this.size; i++)
         {
-            table[0][i + 1] = Integer.toHexString(i);
-            table[1][i + 1] = Integer.toHexString(memory[i]);
+            printTable[0][i + 1] = Integer.toHexString(i);
+            printTable[1][i + 1] = Integer.toHexString(memory[i]);
         }
-        Utils.printTable(table, 2, this.size + 1);
+        Utils.printTable(printTable, 2, this.size + 1);
     }
 }
