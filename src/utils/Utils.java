@@ -106,6 +106,7 @@ public class Utils
             }
             System.out.print("\n");
         }
+        System.out.print("\n");
     }
 
 }
