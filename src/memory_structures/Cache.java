@@ -162,6 +162,7 @@ public class Cache extends MemoryLevel
         // TODO: Finish miss handling and test
         if (writeMissPolicy == WriteMissPolicy.WRITE_ALLOCATE)
         {
+            // Not correct
             int blockNumToReplace = chooseBlockNumToReplace(setIndex);
             int[] newBlock = new int[numWordsPerBlock];
             words[setIndex][blockNumToReplace] = newBlock;
