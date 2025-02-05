@@ -6,15 +6,20 @@ import java.util.Random;
 /*
     Cache Construction:
 
-    Fully Associative: numSets = 1, numBlocksPerSet = 1, other parameters free
-    Direct Mapped: numBlocksPerSet = 1, other parameters free
-    Set Associative (n-way associative): all parameters free
+    - Fully Associative: numSets = 1, numBlocksPerSet = 1, other parameters free
+    - Direct Mapped: numBlocksPerSet = 1, other parameters free
+    - Set Associative (n-way associative): all parameters free
+
+    Other Cache Attributes:
+
+    - Cache is using a NINE inclusion policy
+    - Exclusive inclusion policy could be implemented by adding a public evict() method to MemoryLevel
 
     Address Format:
 
     [        tag       | setIndex | wordOffset ]
 
-    note: wordOffset is the same thing as the Block Offset or Word ID
+    - wordOffset is the same thing as the Block Offset or Word ID
 
     printContents() Table Format:
 
@@ -44,29 +49,25 @@ public class Cache extends MemoryLevel
         RANDOM
     }
 
-    public enum InclusionPolicy
-    {
-        EXCLUSIVE
-    }
-
-    WriteHitPolicy writeHitPolicy;
-    WriteMissPolicy writeMissPolicy;
-    ReplacementAlgorithm replacementAlgorithm;
-    InclusionPolicy inclusionPolicy;
-    int numSets;   // Must be a power of 2
-    int numBlocksPerSet;    // Must be a power of 2
-    int numWordsPerBlock;  // Must be a power of 2
-    int tagSize;
-    int setIndexSize;
-    int wordOffsetSize;
-    int[][][] words;    // word = words[set][block][offset]
-    int[][] tags;       // tag = tags[set][block]
+    final public WriteHitPolicy writeHitPolicy;
+    final public WriteMissPolicy writeMissPolicy;
+    final public ReplacementAlgorithm replacementAlgorithm;
+    final public int numSets;   // Must be a power of 2
+    final public int numBlocksPerSet;    // Must be a power of 2
+    final public int numWordsPerBlock;  // Must be a power of 2
+    private int tagSize;
+    private int setIndexSize;
+    private int wordOffsetSize;
+    private int[][][] words;    // words[setIndex][blockNum][wordOffset]
+    private int[][] tags;       // tags[setIndex][blockNum]
+    private int[][] valid;      // valid[setIndex][blockNum]
+    private int[][] dirty;      // dirty[setIndex][blockNum]
     Random random;
 
     public Cache(int addressSize, int wordSize, MemoryLevel nextMemoryLevel,
                   String name, int numSets, int numBlocksPerSet, int numWordsPerBlock,
                  WriteHitPolicy writeHitPolicy, WriteMissPolicy writeMissPolicy,
-                 ReplacementAlgorithm replacementAlgorithm, InclusionPolicy inclusionPolicy)
+                 ReplacementAlgorithm replacementAlgorithm)
     {
         super(addressSize, wordSize, nextMemoryLevel, name);
         this.numSets = numSets;
@@ -75,7 +76,6 @@ public class Cache extends MemoryLevel
         this.writeHitPolicy = writeHitPolicy;
         this.writeMissPolicy = writeMissPolicy;
         this.replacementAlgorithm = replacementAlgorithm;
-        this.inclusionPolicy = inclusionPolicy;
         // Check 1 or greater
         if (numSets < 1)
         {
@@ -111,9 +111,11 @@ public class Cache extends MemoryLevel
         }
         this.words = new int[numSets][numBlocksPerSet][numWordsPerBlock];
         this.tags = new int[numSets][numBlocksPerSet];
+        this.valid = new int[numSets][numBlocksPerSet];
+        this.dirty = new int[numSets][numBlocksPerSet];
         this.random = new Random();
     }
-    // TODO: Implement
+    // TODO: Correct read/write algorithms and use valid and dirty bits
     @Override
     public int read(int address)
     {
@@ -121,8 +123,33 @@ public class Cache extends MemoryLevel
         {
             throw new IllegalArgumentException("Failed read because address size invalid");
         }
-        return -1;
-
+        // Calculate tag, setIndex, and wordOffset
+        int setIndexMask = ((1 << setIndexSize) - 1) << wordOffsetSize;
+        int wordOffsetMask = (1 << wordOffsetSize) - 1;
+        int tag = address >> (setIndexSize + wordOffsetSize);
+        int setIndex = (address & setIndexMask) >> (wordOffsetSize);
+        int wordOffset = address & wordOffsetMask;
+        // Go to set
+        for (int blockNum = 0; blockNum < numBlocksPerSet; blockNum++)
+        {
+            if (tags[setIndex][blockNum] != tag)
+            {
+                continue;
+            }
+            // HIT!
+            return words[setIndex][blockNum][wordOffset];
+        }
+        // MISS!
+        int[] newBlock = new int[numWordsPerBlock];
+        for (int i = 0; i < numWordsPerBlock; i++)
+        {
+            int addressMask = ~wordOffsetMask;
+            newBlock[i] = nextMemoryLevel.read((address & addressMask) | i);
+        }
+        int blockNumToReplace = chooseBlockNumToReplace(setIndex);
+        words[setIndex][blockNumToReplace] = newBlock;
+        tags[setIndex][blockNumToReplace] = tag;
+        return nextMemoryLevel.read(address);
     }
     @Override
     public void write(int address, int value)
@@ -158,19 +185,26 @@ public class Cache extends MemoryLevel
             return;
         }
         // MISS!
-        // TODO: Account for inclusion policy and dirty/valid bits
-        // TODO: Finish miss handling and test
         if (writeMissPolicy == WriteMissPolicy.WRITE_ALLOCATE)
         {
-            // Not correct
-            int blockNumToReplace = chooseBlockNumToReplace(setIndex);
             int[] newBlock = new int[numWordsPerBlock];
+            for (int i = 0; i < numWordsPerBlock; i++)
+            {
+                int addressMask = ~wordOffsetMask;
+                newBlock[i] = nextMemoryLevel.read((address & addressMask) | i);
+            }
+            int blockNumToReplace = chooseBlockNumToReplace(setIndex);
             words[setIndex][blockNumToReplace] = newBlock;
             tags[setIndex][blockNumToReplace] = tag;
+            // Not implemented:
+//            if (inclusionPolicy == InclusionPolicy.EXCLUSIVE)
+//            {
+//                nextMemoryLevel.evict(address);
+//            }
         }
         else // writeMissPolicy == WriteMissPolicy.NO_WRITE_ALLOCATE
         {
-
+            nextMemoryLevel.write(address, value);
         }
         return;
     }

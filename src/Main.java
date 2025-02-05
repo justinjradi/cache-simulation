@@ -12,7 +12,7 @@ public class Main
         // numSets = 2, numBlocksPerSet = 2, numWordsPerBlock = 4
         Cache cache1 = new Cache(8, 8, mem1, "cache1", 2, 2, 4, Cache.WriteHitPolicy.WRITE_THROUGH,
                 Cache.WriteMissPolicy.NO_WRITE_ALLOCATE, Cache.ReplacementAlgorithm.RANDOM,
-                Cache.InclusionPolicy.EXCLUSIVE);
+                Cache.InclusionPolicy.NINE);
         cache1.printContents();
     }
 }

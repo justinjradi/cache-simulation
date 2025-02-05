@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class Memory extends MemoryLevel
 {
-    private int size;
+    final private int size;
     private int[] memory;
     public Memory(int addressSize, int wordSize, MemoryLevel nextMemoryLevel,
                   String name, int numberOfWords)
