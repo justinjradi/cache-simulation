@@ -42,8 +42,8 @@ public class Memory extends MemoryLevel
     {
         System.out.println("Contents of memory " + name + ":");
         String[][] printTable = new String[2][size + 1];
-        printTable[0][0] = "addy";
-        printTable[1][0] = "val";
+        printTable[0][0] = "Addy";
+        printTable[1][0] = "Val";
         for (int i = 0; i < size; i++)
         {
             printTable[0][i + 1] = "0x" + Integer.toHexString(i);
